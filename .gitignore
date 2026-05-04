@@ -1,0 +1,17 @@
+# Environment — never commit secrets
+.env
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Docker volumes / runtime
+docker-compose.override.yml
+
+# WordPress uploads (large binaries, user content)
+src/themes/kitfix24h/node_modules/

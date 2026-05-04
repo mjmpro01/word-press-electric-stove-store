@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kitfix24h
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: wp
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.8-php8.2-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: kitfix24h
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wp
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      # Mount theme and plugin directly — live-reload on file save
+      - ./src/themes/kitfix24h:/var/www/html/wp-content/themes/kitfix24h
+      - ./src/plugins/kitfix24h-core:/var/www/html/wp-content/plugins/kitfix24h-core
+      - wp_data:/var/www/html
+
+  # wp-cli for auto-install + activation
+  wpcli:
+    image: wordpress:cli-php8.2
+    # Note: wpcli image is based on WP-CLI, not a specific WP version
+    restart: "no"
+    depends_on:
+      wordpress:
+        condition: service_started
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: kitfix24h
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wp
+    volumes:
+      - ./src/themes/kitfix24h:/var/www/html/wp-content/themes/kitfix24h
+      - ./src/plugins/kitfix24h-core:/var/www/html/wp-content/plugins/kitfix24h-core
+      - wp_data:/var/www/html
+      - ./scripts:/scripts
+    entrypoint: ["sh", "/scripts/setup.sh"]
+    user: "33:33"
+
+volumes:
+  db_data:
+  wp_data:
