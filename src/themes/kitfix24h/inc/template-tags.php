@@ -145,57 +145,52 @@ function kitfix_service_meta(): array
 }
 
 /**
- * Return services array — reads from kf_service CPT when available,
- * falls back to hardcoded defaults so the site always works.
+ * Return services array — reads ALL published kf_service CPT posts.
+ * Falls back to 5 hardcoded entries only when no CPT posts exist.
  *
- * @return array<string, array{title:string,icon:string,color:string,bg:string,desc:string,price:string,post_id:int}>
+ * @return array<string, array{title:string,icon:string,color:string,bg:string,desc:string,price:string,post_id:int,url:string}>
  */
 function kitfix_get_services(): array
 {
-    $defaults = [
-        'bep-tu'         => ['title' => 'Sửa bếp từ',        'desc' => 'Sửa không lên lửa, báo lỗi E0–E9, thay mâm từ, bo mạch',        'price' => 'Từ 150.000đ'],
-        'bep-hong-ngoai' => ['title' => 'Sửa bếp hồng ngoại','desc' => 'Khắc phục lỗi nhiệt, mặt kính vỡ, cảm ứng hỏng',                'price' => 'Từ 120.000đ'],
-        'lo-nuong'       => ['title' => 'Sửa lò nướng',       'desc' => 'Không lên nhiệt, dây nhiệt hỏng, timer lỗi, quạt đối lưu',      'price' => 'Từ 200.000đ'],
-        'lo-vi-song'     => ['title' => 'Sửa lò vi sóng',     'desc' => 'Không quay, không nóng, hỏng magnetron, bàn phím',               'price' => 'Từ 180.000đ'],
-        'may-hut-mui'    => ['title' => 'Sửa máy hút mùi',    'desc' => 'Mất hút, ồn, đèn hỏng, thay motor, lọc than hoạt tính',         'price' => 'Từ 100.000đ'],
-    ];
-
     $meta_map = kitfix_service_meta();
-    $services = [];
 
-    // Try to pull from CPT
+    $fallback_icon  = ['icon' => 'tool',  'color' => '#1B4D7A', 'bg' => '#EFF6FF'];
+    $fallback_price = 'Liên hệ báo giá';
+
     $posts = get_posts([
         'post_type'      => 'kf_service',
         'post_status'    => 'publish',
-        'posts_per_page' => 20,
+        'posts_per_page' => -1,
         'orderby'        => 'menu_order',
         'order'          => 'ASC',
     ]);
 
-    foreach ($posts as $post) {
-        $slug = get_post_meta($post->ID, 'service_slug', true) ?: $post->post_name;
-        if (!isset($meta_map[$slug])) {
-            continue;
-        }
-        $price = get_post_meta($post->ID, 'service_price_from', true);
-        $services[$slug] = array_merge($meta_map[$slug], [
-            'title'   => $post->post_title,
-            'desc'    => get_post_meta($post->ID, 'service_hero_desc', true) ?: ($defaults[$slug]['desc'] ?? ''),
-            'price'   => $price ?: ($defaults[$slug]['price'] ?? ''),
-            'post_id' => $post->ID,
-            'url'     => get_permalink($post->ID),
-        ]);
-    }
+    if (!empty($posts)) {
+        $services = [];
+        foreach ($posts as $post) {
+            $slug  = get_post_meta($post->ID, 'service_slug', true) ?: $post->post_name;
+            $style = $meta_map[$slug] ?? $fallback_icon;
+            $price = get_post_meta($post->ID, 'service_price_from', true) ?: $fallback_price;
+            $desc  = get_post_meta($post->ID, 'service_hero_desc', true)
+                  ?: wp_trim_words(wp_strip_all_tags($post->post_content), 14, '...');
 
-    // Fill in any missing slugs with defaults
-    foreach ($defaults as $slug => $data) {
-        if (!isset($services[$slug])) {
-            $services[$slug] = array_merge($meta_map[$slug], $data, [
-                'post_id' => 0,
-                'url'     => home_url("/dich-vu/{$slug}/"),
+            $services[$slug] = array_merge($style, [
+                'title'   => $post->post_title,
+                'desc'    => $desc,
+                'price'   => $price,
+                'post_id' => $post->ID,
+                'url'     => get_permalink($post->ID),
             ]);
         }
+        return $services;
     }
 
-    return $services;
+    // Fallback khi chưa có CPT nào
+    return [
+        'bep-tu'         => array_merge($meta_map['bep-tu'],         ['title' => 'Sửa bếp từ',         'desc' => 'Sửa không lên lửa, báo lỗi E0–E9, thay mâm từ, bo mạch',  'price' => 'Từ 150.000đ', 'post_id' => 0, 'url' => home_url('/dich-vu/bep-tu/')]),
+        'bep-hong-ngoai' => array_merge($meta_map['bep-hong-ngoai'], ['title' => 'Sửa bếp hồng ngoại', 'desc' => 'Khắc phục lỗi nhiệt, mặt kính vỡ, cảm ứng hỏng',           'price' => 'Từ 120.000đ', 'post_id' => 0, 'url' => home_url('/dich-vu/bep-hong-ngoai/')]),
+        'lo-nuong'       => array_merge($meta_map['lo-nuong'],        ['title' => 'Sửa lò nướng',        'desc' => 'Không lên nhiệt, dây nhiệt hỏng, timer lỗi, quạt đối lưu', 'price' => 'Từ 200.000đ', 'post_id' => 0, 'url' => home_url('/dich-vu/lo-nuong/')]),
+        'lo-vi-song'     => array_merge($meta_map['lo-vi-song'],      ['title' => 'Sửa lò vi sóng',      'desc' => 'Không quay, không nóng, hỏng magnetron, bàn phím',          'price' => 'Từ 180.000đ', 'post_id' => 0, 'url' => home_url('/dich-vu/lo-vi-song/')]),
+        'may-hut-mui'    => array_merge($meta_map['may-hut-mui'],     ['title' => 'Sửa máy hút mùi',     'desc' => 'Mất hút, ồn, đèn hỏng, thay motor, lọc than hoạt tính',   'price' => 'Từ 100.000đ', 'post_id' => 0, 'url' => home_url('/dich-vu/may-hut-mui/')]),
+    ];
 }

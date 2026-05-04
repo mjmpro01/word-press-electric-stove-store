@@ -18,7 +18,7 @@ function kitfix_register_post_types(): void
             'edit_item'     => 'Sửa dịch vụ',
         ],
         'public'            => true,
-        'has_archive'       => false,
+        'has_archive'       => 'dich-vu',
         'rewrite'           => ['slug' => 'dich-vu', 'with_front' => false],
         'menu_icon'         => 'dashicons-admin-tools',
         'supports'          => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'],

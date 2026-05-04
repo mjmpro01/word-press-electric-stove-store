@@ -26,6 +26,7 @@ $zalo  = 'https://zalo.me/0918611092';
         <a href="<?php echo esc_url(home_url('/')); ?>" class="kf-nav-link<?php echo is_front_page() ? ' active' : ''; ?>">Trang chủ</a>
         <a href="<?php echo esc_url(home_url('/dich-vu/')); ?>" class="kf-nav-link<?php echo is_page_template('templates/page-service-detail.php') ? ' active' : ''; ?>">Dịch vụ</a>
         <a href="<?php echo esc_url(home_url('/shop/')); ?>" class="kf-nav-link<?php echo (function_exists('is_shop') && (is_shop() || is_product())) ? ' active' : ''; ?>">Phụ kiện</a>
+        <a href="<?php echo esc_url(home_url('/bai-viet/')); ?>" class="kf-nav-link<?php echo (is_home() || is_category() || is_single()) ? ' active' : ''; ?>">Blog</a>
         <a href="<?php echo esc_url(home_url('/ve-chung-toi/')); ?>" class="kf-nav-link<?php echo is_page('ve-chung-toi') ? ' active' : ''; ?>">Về chúng tôi</a>
       </nav>
 
@@ -57,6 +58,7 @@ $zalo  = 'https://zalo.me/0918611092';
       <a href="<?php echo esc_url(home_url('/')); ?>" class="kf-mobile-nav-link">Trang chủ</a>
       <a href="<?php echo esc_url(home_url('/dich-vu/')); ?>" class="kf-mobile-nav-link">Dịch vụ</a>
       <a href="<?php echo esc_url(home_url('/shop/')); ?>" class="kf-mobile-nav-link">Phụ kiện</a>
+      <a href="<?php echo esc_url(home_url('/bai-viet/')); ?>" class="kf-mobile-nav-link">Blog</a>
       <a href="<?php echo esc_url(home_url('/ve-chung-toi/')); ?>" class="kf-mobile-nav-link">Về chúng tôi</a>
       <a href="<?php echo esc_url(home_url('/dat-lich/')); ?>" class="kf-btn kf-btn-primary" style="margin-top:8px;justify-content:center;">
         <?php kitfix_icon('calendar', 16); ?>
